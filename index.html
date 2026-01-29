@@ -283,7 +283,357 @@
                 </ul>
             </nav>
         </header>
+        <!-- X动态墙组件 -->
+<div id="x-dynamic-wall-container" class="x-wall-section">
+    <div class="x-wall-header">
+      <h2>$SPARK 社区动态</h2>
+      <button id="refresh-x-wall" class="refresh-button">🔄 刷新</button>
+    </div>
+    <div class="x-wall-stats">
+      <div class="stat-item">
+        <span class="stat-number" id="total-tweets-count">0</span>
+        <span class="stat-label">总推文数</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="positive-sentiment">0%</span>
+        <span class="stat-label">积极情绪</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="negative-sentiment">0%</span>
+        <span class="stat-label">消极情绪</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="top-word">-</span>
+        <span class="stat-label">热门词汇</span>
+      </div>
+    </div>
+    <div id="x-tweets-container" class="x-tweets-container">
+      <div class="loading-indicator">
+        正在加载$SPARK社区动态...
+      </div>
+    </div>
+  </div>
+  
+  <style>
+  .x-wall-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .x-wall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .x-wall-header h2 {
+    color: #1DA1F2;
+    margin: 0;
+    font-size: 1.5em;
+  }
+  
+  .refresh-button {
+    background: #1DA1F2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+  }
+  
+  .refresh-button:hover {
+    background: #1a91da;
+  }
+  
+  .x-wall-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-item {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+  }
+  
+  .stat-number {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #1DA1F2;
+  }
+  
+  .stat-label {
+    font-size: 0.8em;
+    color: #8899a6;
+  }
+  
+  .loading-indicator {
+    text-align: center;
+    padding: 40px;
+    color: #8899a6;
+    font-style: italic;
+  }
+  
+  .x-tweets-container {
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  
+  .x-tweet-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    backdrop-filter: blur(5px);
+  }
+  
+  .x-tweet-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(29, 161, 242, 0.2);
+  }
+  
+  .x-tweet-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .x-profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+  
+  .x-user-info {
+    flex: 1;
+  }
+  
+  .x-username {
+    font-weight: bold;
+    color: white;
+    display: block;
+  }
+  
+  .x-handle {
+    color: #8899a6;
+    font-size: 0.9em;
+    display: block;
+  }
+  
+  .x-verified-badge {
+    color: #1DA1F2;
+    margin-left: 5px;
+  }
+  
+  .x-tweet-text {
+    color: white;
+    margin: 10px 0;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  
+  .x-tweet-text a {
+    color: #1DA1F2;
+    text-decoration: none;
+  }
+  
+  .x-tweet-metrics {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+    color: #8899a6;
+    font-size: 0.9em;
+  }
+  
+  .x-tweet-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #1DA1F2;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  
+  .x-tweet-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* 滚动条样式 */
+  .x-tweets-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .x-tweets-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .x-tweets-container::-webkit-scrollbar-thumb {
+    background: #1DA1F2;
+    border-radius: 4px;
+  }
+  
+  .x-tweets-container::-webkit-scrollbar-thumb:hover {
+    background: #1a91da;
+  }
+  </style>
+  
+  <script>
+  // X动态墙功能
+  class XDynamicWall {
+    constructor() {
+      this.apiUrl = '/api/x-integration';
+      this.init();
+    }
+  
+    init() {
+      this.loadTweets();
+      // 每5分钟自动刷新
+      setInterval(() => {
+        this.loadTweets();
+      }, 5 * 60 * 1000);
+      
+      // 绑定刷新按钮
+      document.getElementById('refresh-x-wall').addEventListener('click', () => {
+        this.loadTweets(true);
+      });
+    }
+  
+    async loadTweets(forceRefresh = false) {
+      try {
+        // 显示加载状态
+        document.getElementById('x-tweets-container').innerHTML = 
+          '<div class="loading-indicator">加载中...</div>';
+  
+        // 获取推文数据
+        const tweetsResponse = await fetch(`${this.apiUrl}/tweets`);
+        if (!tweetsResponse.ok) {
+          throw new Error(`API请求失败: ${tweetsResponse.status}`);
+        }
+        const data = await tweetsResponse.json();
+  
+        // 更新统计数据
+        this.updateStats(data.analytics);
+  
+        // 渲染推文
+        this.renderTweets(data.tweets);
+  
+      } catch (error) {
+        console.error('加载X动态失败:', error);
+        document.getElementById('x-tweets-container').innerHTML = 
+          '<div class="loading-indicator" style="color: #ff6b6b;">加载失败，请稍后重试</div>';
+      }
+    }
+  
+    updateStats(analytics) {
+      if (analytics) {
+        document.getElementById('total-tweets-count').textContent = analytics.totalTweets || 0;
         
+        if (analytics.sentiment) {
+          document.getElementById('positive-sentiment').textContent = 
+            `${Math.round((analytics.sentiment.positiveRatio || 0) * 100)}%`;
+          document.getElementById('negative-sentiment').textContent = 
+            `${Math.round((analytics.sentiment.negativeRatio || 0) * 100)}%`;
+        }
+        
+        if (analytics.trends && analytics.trends.topWords && analytics.trends.topWords[0]) {
+          document.getElementById('top-word').textContent = analytics.trends.topWords[0][0];
+        }
+      }
+    }
+  
+    renderTweets(tweets) {
+      if (!tweets || tweets.length === 0) {
+        document.getElementById('x-tweets-container').innerHTML = 
+          '<div class="loading-indicator">暂无$SPARK相关推文</div>';
+        return;
+      }
+  
+      const tweetsHtml = tweets.map(tweet => `
+        <div class="x-tweet-card">
+          <div class="x-tweet-header">
+            <img src="${tweet.author.profileImage || 'https://placehold.co/40x40?text=U'}" 
+                 alt="${tweet.author.name}" class="x-profile-img">
+            <div class="x-user-info">
+              <span class="x-username">${this.escapeHtml(tweet.author.name)}
+                ${tweet.author.verified ? '<span class="x-verified-badge">✓</span>' : ''}
+              </span>
+              <span class="x-handle">@${this.escapeHtml(tweet.author.username)}</span>
+            </div>
+          </div>
+          <div class="x-tweet-text">${this.formatTweetText(tweet.text)}</div>
+          <div class="x-tweet-metrics">
+            <span>❤️ ${tweet.metrics.likes}</span>
+            <span>🔄 ${tweet.metrics.retweets}</span>
+            <span>💬 ${tweet.metrics.replies}</span>
+          </div>
+          <div>
+            <a href="${tweet.url}" target="_blank" rel="noopener" class="x-tweet-link">查看原文</a>
+          </div>
+        </div>
+      `).join('');
+  
+      document.getElementById('x-tweets-container').innerHTML = tweetsHtml;
+    }
+  
+    formatTweetText(text) {
+      // 简单的链接和@用户名格式化
+      let formattedText = this.escapeHtml(text);
+      
+      // 格式化URL
+      formattedText = formattedText.replace(
+        /(https?:\/\/[^\s]+)/g, 
+        '<a href="$1" target="_blank" rel="noopener">$1</a>'
+      );
+      
+      // 格式化@用户名
+      formattedText = formattedText.replace(
+        /@(\w+)/g, 
+        '<a href="https://x.com/$1" target="_blank" rel="noopener">@$1</a>'
+      );
+      
+      // 格式化#话题
+      formattedText = formattedText.replace(
+        /#(\w+)/g, 
+        '<a href="https://x.com/hashtag/$1" target="_blank" rel="noopener">#$1</a>'
+      );
+      
+      return formattedText;
+    }
+  
+    escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  }
+  
+  // 页面加载完成后初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    new XDynamicWall();
+  });
+  </script>
         <section class="hero" id="home">
             <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
                 <h1>$SPARK</h1>
@@ -688,7 +1038,183 @@
             <p>© 2026 $SPARK. All rights reserved. DYOR.</p>
         </footer>
     </div>
+    <!-- 在您的网站模板中添加此部分 -->
+<div id="spark-x-dynamic-wall">
+    <!-- 这里将显示X动态墙 -->
+  </div>
+  
+  <script>
+  // 动态加载X动态墙
+  async function loadSparkXWall() {
+    const container = document.getElementById('spark-x-dynamic-wall');
     
+    container.innerHTML = `
+      <style>
+        .spark-x-wall {
+          background: rgba(21, 32, 43, 0.8);
+          border: 1px solid #38444d;
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
+        }
+        
+        .x-wall-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #333;
+        }
+        
+        .x-wall-title {
+          color: #1DA1F2;
+          font-size: 1.2em;
+          font-weight: bold;
+        }
+        
+        .x-wall-refresh {
+          background: #1DA1F2;
+          color: white;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        
+        .x-tweets-container {
+          max-height: 600px;
+          overflow-y: auto;
+        }
+        
+        .x-tweet-card {
+          background: #15202b;
+          border: 1px solid #38444d;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 10px;
+        }
+        
+        .x-tweet-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        
+        .x-profile-img {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+        
+        .x-user-info {
+          flex: 1;
+        }
+        
+        .x-username {
+          font-weight: bold;
+          color: white;
+        }
+        
+        .x-handle {
+          color: #8899a6;
+          font-size: 0.9em;
+        }
+        
+        .x-tweet-text {
+          color: white;
+          margin: 8px 0;
+          line-height: 1.4;
+        }
+        
+        .x-tweet-metrics {
+          display: flex;
+          gap: 15px;
+          color: #8899a6;
+          font-size: 0.9em;
+        }
+        
+        .x-tweet-link {
+          color: #1DA1F2;
+          text-decoration: none;
+          font-size: 0.9em;
+        }
+      </style>
+      
+      <div class="spark-x-wall">
+        <div class="x-wall-header">
+          <div class="x-wall-title">$SPARK 社区动态</div>
+          <button class="x-wall-refresh" onclick="refreshXWall()">🔄 刷新</button>
+        </div>
+        <div id="x-tweets-container" class="x-tweets-container">
+          <div style="text-align: center; padding: 20px; color: #8899a6;">
+            正在加载$SPARK社区动态...
+          </div>
+        </div>
+      </div>
+    `;
+    
+    await refreshXWall();
+  }
+  
+  async function refreshXWall() {
+    try {
+      const response = await fetch('/api/x-integration/tweets');
+      const data = await response.json();
+      
+      const tweetsContainer = document.getElementById('x-tweets-container');
+      
+      if (!data.tweets || data.tweets.length === 0) {
+        tweetsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #8899a6;">暂无$SPARK相关推文</div>';
+        return;
+      }
+      
+      const tweetsHtml = data.tweets.map(tweet => `
+        <div class="x-tweet-card">
+          <div class="x-tweet-header">
+            <img src="${tweet.author.profileImage || 'https://via.placeholder.com/32'}" 
+                 alt="${tweet.author.name}" class="x-profile-img">
+            <div class="x-user-info">
+              <div class="x-username">${escapeHtml(tweet.author.name)}</div>
+              <div class="x-handle">@${escapeHtml(tweet.author.username)}</div>
+            </div>
+          </div>
+          <div class="x-tweet-text">${escapeHtml(tweet.text)}</div>
+          <div class="x-tweet-metrics">
+            <span>❤️ ${tweet.metrics.likes}</span>
+            <span>🔄 ${tweet.metrics.retweets}</span>
+            <span>💬 ${tweet.metrics.replies}</span>
+          </div>
+          <div>
+            <a href="${tweet.url}" target="_blank" rel="noopener" class="x-tweet-link">查看原文</a>
+          </div>
+        </div>
+      `).join('');
+      
+      tweetsContainer.innerHTML = tweetsHtml;
+    } catch (error) {
+      console.error('加载X动态失败:', error);
+      document.getElementById('x-tweets-container').innerHTML = 
+        '<div style="text-align: center; padding: 20px; color: #ff6b6b;">加载失败，请稍后重试</div>';
+    }
+  }
+  
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+  
+  // 页面加载时初始化
+  document.addEventListener('DOMContentLoaded', loadSparkXWall);
+  
+  // 每5分钟自动刷新
+  setInterval(refreshXWall, 5 * 60 * 1000);
+  </script>
     <script>
         // Simple animation for the hero section
         document.addEventListener('DOMContentLoaded', function() {
